@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Mettre à jour les paquets
+yum update -y
+
+# Installer Java 1.8
+amazon-linux-extras enable java-openjdk8
+yum install -y java-1.8.0-openjdk-devel
+
+# Définir JAVA_HOME
+echo "export JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which javac)))))" >> /etc/profile.d/java.sh
+source /etc/profile.d/java.sh
+
+# Télécharger et installer Tomcat 9
+cd /opt
+wget https://downloads.apache.org/tomcat/tomcat-9/v9.0.85/bin/apache-tomcat-9.0.85.tar.gz
+tar -xvzf apache-tomcat-9.0.85.tar.gz
+ln -s apache-tomcat-9.0.85 tomcat9
+
+# Rendre les scripts exécutables
+chmod +x /opt/tomcat9/bin/*.sh
+
+# Créer un user tomcat (facultatif mais propre)
+useradd -r -m -U -d /opt/tomcat9 -s /bin/false tomcat
+chown -R tomcat: /opt/apache-tomcat-9.0.85
+
+# Lancer Tomcat
+sudo -u tomcat /opt/tomcat9/bin/startup.sh
